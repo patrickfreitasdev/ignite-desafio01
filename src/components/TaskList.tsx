@@ -14,16 +14,43 @@ export function TaskList() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTaskTitle, setNewTaskTitle] = useState('');
 
+  //Let's handle the errors and show to user a log
+  const [errorlog, setErrorLog] = useState('')
+  const [error, setError] = useState(false)
+
   function handleCreateNewTask() {
     // Crie uma nova task com um id random, não permita criar caso o título seja vazio.
+    let title = newTaskTitle;
+
+    if( title ){
+      let taskTemp : Task = {id: Number( Math.random() ), title: title, isComplete: false}
+      setTasks(oldState => [...oldState, taskTemp]);
+
+      setError(false);
+      setErrorLog('');
+
+    }else{
+      setError(true);
+      setErrorLog('Title can not be empty');
+      return;
+    }
   }
 
   function handleToggleTaskCompletion(id: number) {
     // Altere entre `true` ou `false` o campo `isComplete` de uma task com dado ID
+   const newTasks = tasks.map( task => task.id === id ? {
+     ...task,
+     isComplete: !task.isComplete,
+   } : task );
+
+   setTasks(newTasks);
+
   }
 
   function handleRemoveTask(id: number) {
     // Remova uma task da listagem pelo ID
+    const newTaskList = tasks.filter(task => task.id !== id);
+    setTasks(newTaskList);
   }
 
   return (
@@ -38,6 +65,7 @@ export function TaskList() {
             onChange={(e) => setNewTaskTitle(e.target.value)}
             value={newTaskTitle}
           />
+          
           <button type="submit" data-testid="add-task-button" onClick={handleCreateNewTask}>
             <FiCheckSquare size={16} color="#fff"/>
           </button>
@@ -46,6 +74,7 @@ export function TaskList() {
 
       <main>
         <ul>
+         {error && <p style={{color: 'red'}}> {errorlog} </p>}
           {tasks.map(task => (
             <li key={task.id}>
               <div className={task.isComplete ? 'completed' : ''} data-testid="task" >
@@ -66,7 +95,7 @@ export function TaskList() {
               </button>
             </li>
           ))}
-          
+
         </ul>
       </main>
     </section>
